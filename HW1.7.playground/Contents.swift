@@ -7,13 +7,14 @@ import UIKit
  1.1 Создайте перечисление `CalculationType`, содержащее четыре математических действия — *сложение*, *вычитание*, *умножение* и *деление*.
  */
 enum CalculationType: String {
-    case addition = "Сложение"
-    case subtraction = "Вычитание"
-    case multiplication = "Умножение"
-    case division = "Деление"
+    case addition = "cложения"
+    case subtraction = "вычитания"
+    case multiplication = "умножения"
+    case division = "деления"
 }
 //: 1.2 Напишите функцию возвращающую `Int` и принимающую в качестве параметров три значения: число один, число два и тип математической операции. Внутри функции, в зависимости от значения параметра `CalculationType` выполните соответствующую математическую операцию с константами и верните результат. Реализуйте функцию таким образом, что бы при каждом её вызове на консоль выводилось сообщение следующего содержания: «Результат сложения (вычитания, деления, умножения) <…> и <…> равен <…>».
-func calculate (numberOne: Int, numberTwo: Int, calculationType: CalculationType) -> Int {
+func calculate (numberOne: Int, numberTwo: Int, calculationType: CalculationType) -> Int? {
+    
     let result: Int
     
     switch calculationType {
@@ -24,10 +25,14 @@ func calculate (numberOne: Int, numberTwo: Int, calculationType: CalculationType
     case .multiplication:
         result =  numberOne * numberTwo
     case .division:
-        result =  numberOne / numberTwo
+        if numberTwo != 0 {
+            result =  numberOne / numberTwo
+        } else {
+            print("На ноль делить нельзя")
+            return nil
+        }
     }
-    //надо было указывать rawValue в нужном склонении?
-    //также я могла просто использовать calculationType для вывода оперании на англ
+    
     print("Результат \(calculationType.rawValue) \(numberOne) и \(numberTwo) равен \(result)")
     return result
 }
@@ -47,9 +52,19 @@ calculate(numberOne: 4, numberTwo: 6, calculationType: .subtraction)
  Доллар должен иметь на один ассоциативный параметр больше, в соответствии с перечислением `DollarCountrys`.
  */
 enum CurrencyUnit {
-    case rouble(countries: [String], currencyCode: String)
-    case dollar(countries: [String], currencyCode: String, emitentsCountry: DollarCountrys)
-    case euro([String], String)
+    case rouble(
+            countries: [String],
+            currencyCode: String
+         )
+    case dollar(
+            countries: [String],
+            currencyCode: String,
+            emitentsCountry: DollarCountrys
+         )
+    case euro(
+            countries: [String],
+            currencyCode: String
+         )
     
     enum DollarCountrys: String {
         case usa = "Доллар США"
@@ -64,47 +79,36 @@ enum CurrencyUnit {
  2.2 Создайте экземпляр `dollarCurrency` и присвойете ему значения относящиеся к доллару.
  */
 
-let dollarCurrency = CurrencyUnit.dollar(countries: ["США", "Доминикана", "Куба"], currencyCode: "USD", emitentsCountry: .usa)
-dollarCurrency
-let rubbleCurrency = CurrencyUnit.rouble(countries: ["Россия"], currencyCode: "RU")
+let dollarCurrency = CurrencyUnit.dollar(
+    countries: ["США", "Доминикана", "Куба"],
+    currencyCode: "USD",
+    emitentsCountry: .usa
+)
+
+let rubbleCurrency = CurrencyUnit.rouble(
+    countries: ["Россия"],
+    currencyCode: "RU"
+)
+
+print(type(of: dollarCurrency))
 
 /*: 2.3 Создайте функцию, которая должна принимать валюту и выводить на консоль информацию о ней, например: "Доллар США. Катируется в: США, Доминикана, Куба. Краткое наименование: USD. Для рубля и евро нужно будет определить только список стран и аббривиатуру валюты.
 */
 func createCurrencyDescription (currencyUnit: CurrencyUnit) -> String {
-    var informationString: String
-    
     switch currencyUnit {
     case let .dollar(countries, currencyCode, emitentsCountry):
-        informationString = emitentsCountry.rawValue + ". Катируется в: "
-        
-        for country in countries {
-            informationString += country
-            
-            if country != countries.last {
-                informationString += ", "
-            } else {
-                informationString += ". "
-            }
-        }
-        
-        informationString += "Краткое наименование: \(currencyCode)."
-    case let .euro(countries, currencyCode), let .rouble(countries, currencyCode):
-        informationString = "Катируется в: "
-        
-        for country in countries {
-            informationString += country
-            
-            if country != countries.last {
-                informationString += ", "
-            } else {
-                informationString += ". "
-            }
-        }
-        
-        informationString += "Краткое наименование: \(currencyCode)."
+        return """
+            \(emitentsCountry.rawValue).
+            Катируется в: \(countries.joined(separator: ", ")).
+            Краткое наименование: \(currencyCode).
+            """
+    case let .euro(countries, currencyCode),
+         let .rouble(countries, currencyCode):
+        return """
+            Катируется в: \(countries.joined(separator: ", ")).
+            Краткое наименование: \(currencyCode).
+            """
     }
-    
-    return informationString
 }
 
 print(createCurrencyDescription(currencyUnit: dollarCurrency))
@@ -122,7 +126,7 @@ print(createCurrencyDescription(currencyUnit: rubbleCurrency))
   */
 struct ChessPlayer {
     let name: String
-    var wins: Int
+    private(set) var wins: Int
     
     var description: String {
         "Имя \(name) и вот количество его побед \(wins)"
